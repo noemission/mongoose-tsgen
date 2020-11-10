@@ -80,9 +80,7 @@ export const parseSchema = ({ schema, modelName, addModel = false, header = "", 
               child.schema._isSubdocArray = isSubdocArray;
               flatSchemaTree[path] = isSubdocArray ? [child.schema] : child.schema;
           
-              const header = `\tinterface I${name} extends ${
-                  isSubdocArray ? "mongoose.Types.Subdocument" : "Document"
-                  } {\n`;
+              const header = `\tinterface I${name} {\n \t\t_id: string; \n`;
 
               childInterfaces += parseSchema({ schema: child.schema, modelName: name, header, footer: "\t}\n\n", prefix: "\t\t" });
           };
@@ -95,11 +93,11 @@ export const parseSchema = ({ schema, modelName, addModel = false, header = "", 
       template += childInterfaces;
   }
 
-  if (schema.statics && modelName && addModel) {
-      template += `\tinterface I${modelName}Model extends Model<I${modelName}> {\n`;
-      template += parseFunctions(schema.statics, "\t\t");
-      template += "\t}\n\n";
-  }
+  // if (schema.statics && modelName && addModel) {
+  //     template += `\tinterface I${modelName}Model extends Model<I${modelName}> {\n`;
+  //     template += parseFunctions(schema.statics, "\t\t");
+  //     template += "\t}\n\n";
+  // }
 
   template += header;
 
@@ -192,6 +190,10 @@ export const parseSchema = ({ schema, modelName, addModel = false, header = "", 
         case "ObjectId":
           return "";
         default:
+          if (val.type && (val.type as any).name === 'Email') {
+            valType = "string";
+            break;
+          }
           // if we dont find it, go one level deeper
           valType = parseSchema({ schema: { tree: val }, header: "{\n", footer: prefix + "}", prefix: prefix + "\t"});
           isOptional = false;
@@ -202,7 +204,8 @@ export const parseSchema = ({ schema, modelName, addModel = false, header = "", 
 
     if (isArray)
       valType =
-        `Types.${val._isSubdocArray ? "Document" : ""}Array<` + valType + ">";
+        `${valType}[]`
+        // `Types.${val._isSubdocArray ? "Document" : ""}Array<` + valType + ">";
 
     return makeLine({ key, val: valType, prefix, isOptional });
 }
@@ -297,6 +300,15 @@ export const loadSchemas = (modelsPath: string | string[]) => {
   const schemas: LoadedSchemas = {};
 
   const checkAndRegisterModel = (obj: any): boolean => {
+    const express = require('express');
+    const feathers = require('@feathersjs/feathers');
+    const mongoose = require('mongoose');
+    require('mongoose-type-email');
+    const app =  express(feathers());
+    app.set('mongooseClient', mongoose)
+    if (typeof obj === 'function') {
+        obj = obj(app)
+    }
     if (!obj?.modelName || !obj?.schema) return false;
     schemas[obj.modelName] = obj.schema;
     return true;
@@ -392,7 +404,7 @@ export const generateFileString = ({
     let interfaceStr = "";
 
     // passing modelName causes childSchemas to be processed
-    interfaceStr += parseSchema({ schema, modelName, addModel: true, header: `\tinterface I${modelName} extends Document {\n`, footer: "\t}\n\n", prefix: "\t\t" });
+    interfaceStr += parseSchema({ schema, modelName, addModel: true, header: `\tinterface I${modelName} {\n \t\t_id: string; \n`, footer: "\t}\n\n", prefix: "\t\t" });
     fullTemplate += interfaceStr;
   });
 

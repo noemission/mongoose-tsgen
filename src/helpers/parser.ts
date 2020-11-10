@@ -203,10 +203,8 @@ export const parseSchema = ({ schema, modelName, addModel = false, header = "", 
     if (!valType) return "";
 
     if (isArray)
-      valType =
-        `${valType}[]`
-        // `Types.${val._isSubdocArray ? "Document" : ""}Array<` + valType + ">";
-
+      valType = `${valType}[]`;
+      
     return makeLine({ key, val: valType, prefix, isOptional });
 }
 

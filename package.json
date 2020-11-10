@@ -1,12 +1,9 @@
 {
-  "name": "mongoose-tsgen",
+  "name": "mongoose-tsgen-feathers",
   "description": "A Typescript interface generator for Mongoose that works out of the box.",
-  "version": "4.1.5",
-  "author": "Francesco Virga @francescov1",
   "bin": {
-    "mtgen": "./bin/run"
+    "mtgen": "bin/run"
   },
-  "bugs": "https://github.com/Bounced-Inc/mongoose-tsgen/issues",
   "dependencies": {
     "@feathersjs/feathers": "^4.5.10",
     "@oclif/command": "^1.8.0",
@@ -46,7 +43,6 @@
     "/bin",
     "/lib"
   ],
-  "homepage": "https://github.com/Bounced-Inc/mongoose-tsgen",
   "keywords": [
     "mongoose",
     "generator",
@@ -60,12 +56,24 @@
   "oclif": {
     "bin": "mtgen"
   },
-  "repository": "Bounced-Inc/mongoose-tsgen",
   "scripts": {
     "posttest": "eslint . --ext .ts --config .eslintrc",
     "prepack": "rm -rf lib && tsc -b",
     "test": "npx jest",
     "readme": "./node_modules/@oclif/dev-cli/bin/run readme"
   },
-  "types": "lib/index.d.ts"
+  "types": "lib/index.d.ts",
+  "directories": {
+    "lib": "lib"
+  },
+  "version": "1.0.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/noemission/mongoose-tsgen.git"
+  },
+  "author": "Alex Michailidis",
+  "bugs": {
+    "url": "https://github.com/noemission/mongoose-tsgen/issues"
+  },
+  "homepage": "https://github.com/noemission/mongoose-tsgen#readme"
 }

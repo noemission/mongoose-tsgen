@@ -8,14 +8,17 @@
   },
   "bugs": "https://github.com/Bounced-Inc/mongoose-tsgen/issues",
   "dependencies": {
+    "@feathersjs/feathers": "^4.5.10",
     "@oclif/command": "^1.8.0",
     "@oclif/config": "^1.17.0",
     "@oclif/plugin-help": "^3.2.0",
     "cli-ux": "^5.5.0",
+    "express": "^4.17.1",
     "flat": "^5.0.2",
     "glob": "^7.1.6",
     "mkdirp": "^1.0.4",
     "mongoose": "^5.10.6",
+    "mongoose-type-email": "^1.0.13",
     "ts-node": "^9.0.0",
     "tsconfig-paths": "^3.9.0",
     "tslib": "^1.13.0"

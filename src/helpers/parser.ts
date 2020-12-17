@@ -24,6 +24,24 @@ const getSubDocName = (path: string, modelName = "") => {
   return subDocName;
 };
 
+class Float extends mongoose.SchemaType {
+  constructor(key: any, options: any) {
+    super(key, options, 'Float');
+  }
+
+  // `cast()` takes a parameter that can be anything. You need to
+  // validate the provided `val` and throw a `CastError` if you
+  // can't convert it.
+  cast(val: any) {
+    const _val = Number(val);
+    if (isNaN(_val)) {
+      throw new TypeError('Float: ' + val + ' is not a number');
+    }
+
+    return parseFloat(val) || 0;
+  }
+}
+
 const makeLine = ({
   key,
   val,
@@ -105,7 +123,7 @@ export const parseSchema = ({ schema, modelName, addModel = false, header = "", 
 
   const parseKey = (key: string, val: any, prefix: string): string => {
     // if type is provided directly on property, expand it
-    if ([String, Number, Boolean, Date, ObjectId].includes(val))
+    if ([String, Number, Boolean, Date, ObjectId, Float].includes(val))
       val = { type: val, required: false };
 
     let valType;
@@ -176,6 +194,9 @@ export const parseSchema = ({ schema, modelName, addModel = false, header = "", 
           break;
         case Number:
           if (key !== "__v") valType = "number";
+          break;
+        case Float:
+          valType = "number";
           break;
         case Boolean:
           valType = "boolean";
@@ -297,23 +318,7 @@ export const findModelsPath = (basePath: string, useJs = false): string | string
 interface LoadedSchemas {
   [modelName: string]: mongoose.Schema
 }
-class Float extends mongoose.SchemaType {
-  constructor(key: any, options: any) {
-    super(key, options, 'Float');
-  }
 
-  // `cast()` takes a parameter that can be anything. You need to
-  // validate the provided `val` and throw a `CastError` if you
-  // can't convert it.
-  cast(val: any) {
-    const _val = Number(val);
-    if (isNaN(_val)) {
-      throw new TypeError('Float: ' + val + ' is not a number');
-    }
-
-    return parseFloat(val) || 0;
-  }
-}
 export const loadSchemas = (modelsPath: string | string[]) => {
   const schemas: LoadedSchemas = {};
 
@@ -322,9 +327,9 @@ export const loadSchemas = (modelsPath: string | string[]) => {
     const feathers = require('@feathersjs/feathers');
     const mongoose = require('mongoose');
     require('mongoose-type-email');
+    mongoose.Schema.Types.Float = Float
     const app =  express(feathers());
     app.set('mongooseClient', mongoose)
-    mongoose.Schema.Types.Float = Float
 
     if (typeof obj === 'function') {
         obj = obj(app)

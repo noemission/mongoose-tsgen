@@ -194,6 +194,10 @@ export const parseSchema = ({ schema, modelName, addModel = false, header = "", 
             valType = "string";
             break;
           }
+          if (val.type && (val.type as any).name === 'Float') {
+            valType = "number";
+            break;
+          }
           // if we dont find it, go one level deeper
           valType = parseSchema({ schema: { tree: val }, header: "{\n", footer: prefix + "}", prefix: prefix + "\t"});
           isOptional = false;
@@ -293,7 +297,23 @@ export const findModelsPath = (basePath: string, useJs = false): string | string
 interface LoadedSchemas {
   [modelName: string]: mongoose.Schema
 }
+class Float extends mongoose.SchemaType {
+  constructor(key: any, options: any) {
+    super(key, options, 'Float');
+  }
 
+  // `cast()` takes a parameter that can be anything. You need to
+  // validate the provided `val` and throw a `CastError` if you
+  // can't convert it.
+  cast(val: any) {
+    const _val = Number(val);
+    if (isNaN(_val)) {
+      throw new TypeError('Float: ' + val + ' is not a number');
+    }
+
+    return parseFloat(val) || 0;
+  }
+}
 export const loadSchemas = (modelsPath: string | string[]) => {
   const schemas: LoadedSchemas = {};
 
@@ -304,6 +324,8 @@ export const loadSchemas = (modelsPath: string | string[]) => {
     require('mongoose-type-email');
     const app =  express(feathers());
     app.set('mongooseClient', mongoose)
+    mongoose.Schema.Types.Float = Float
+
     if (typeof obj === 'function') {
         obj = obj(app)
     }
